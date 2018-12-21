@@ -1,6 +1,6 @@
 # TradeMe Feedback Scraper
 
-A simple Python web scraper that retrieves listing details from a given user's feedback and outputs then as a csv.
+A simple Python web scraper that retrieves listing details from a given user's feedback and outputs them as a csv.
 
 ## Getting Started
 
