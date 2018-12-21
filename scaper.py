@@ -12,14 +12,15 @@ parser.add_argument(
     "--member",
     action="store",
     dest="member_id",
-    help="member id to scrape feedback from",
+    help="member id to scrape feedback from, e.g., 9999999",
+    required=True,
 )
 parser.add_argument(
     "-p",
     "--page",
     action="store",
     dest="input_page",
-    help="feedback page number to scrape",
+    help="feedback page number to scrape, e.g., 1",
     default=1,
 )
 parser.add_argument(
@@ -27,18 +28,18 @@ parser.add_argument(
     "--limit",
     action="store",
     dest="limit",
-    help="limit the number of scraped feedback entries",
-    default=None,
+    help="limit the number of scraped feedback entries, e.g., 50",
+    default=50,
 )
 parser.add_argument(
     "-o",
     "--output",
     action="store",
     dest="output_filename",
-    help="output filename",
+    help="output filename, e.g., samuels-feedback",
     default=None,
 )
-args = parser.parse_args()
+args = vars(parser.parse_args())
 
 
 def clean_ids(ids):
@@ -93,19 +94,24 @@ def write_csv(output, data):
 
 
 def run():
-    auction_ids, member = fetch_auction_ids(member_id, input_page)
-    auction_info = [["Url", "Title", "Date"]]
-    id_count = len(auction_ids)
-    for idx, id in enumerate(auction_ids[:5]):
-        draw_progress_bar(idx / (id_count - 1), "fetching auction " + id)
-        auction_info.append(fetch_auction(id))
+    if args["member_id"]:
+        auction_ids, member = fetch_auction_ids(args["member_id"], args["input_page"])
+        auction_info = [["Url", "Title", "Date"]]
+        id_count = len(auction_ids)
+        for idx, id in enumerate(auction_ids[: args["limit"]]):
+            draw_progress_bar(idx / (id_count - 1), "fetching auction " + id)
+            auction_info.append(fetch_auction(id))
 
-    output_target = (
-        output_filename
-        if output_filename is not None
-        else member[0] + " - " + str(member_id)
-    )
-    write_csv(output_target, auction_info)
+        output_target = (
+            args["output_filename"]
+            if args["output_filename"] is not None
+            else member[0] + "-" + str(args["member_id"])
+        )
+        write_csv(output_target, auction_info)
+        print("\nFeedback written to", output_target + ".csv")
+    else:
+        parser.print_help()
+        sys.exit(0)
 
 
 run()
