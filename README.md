@@ -19,3 +19,8 @@ Run the script with the desired parameters
 ```
 python3 scraper.py -m <memberId> -o <outputFile> -l <limit> -p <page>
 ```
+
+If you're unsure parameters are available, check the help message
+```
+python3 scraper.py -h
+```
