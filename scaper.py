@@ -4,31 +4,57 @@ import argparse
 import requests
 from lxml import html
 
-parser = argparse.ArgumentParser(description='Scrape feedback details from TradeMe members')
-parser.add_argument('-m', '--member',
-            action="store", dest="member_id",
-            help="member id to scrape feedback from")
-parser.add_argument('-p', '--page',
-            action="store", dest="input_page",
-            help="feedback page number to scrape", default=1)
-parser.add_argument('-l', '--limit',
-            action="store", dest="limit",
-            help="limit the number of scraped feedback entries", default=None)
-parser.add_argument('-o', '--output',
-            action="store", dest="output_filename",
-            help="output filename", default=None)
+parser = argparse.ArgumentParser(
+    description="Scrape feedback details from TradeMe members"
+)
+parser.add_argument(
+    "-m",
+    "--member",
+    action="store",
+    dest="member_id",
+    help="member id to scrape feedback from",
+)
+parser.add_argument(
+    "-p",
+    "--page",
+    action="store",
+    dest="input_page",
+    help="feedback page number to scrape",
+    default=1,
+)
+parser.add_argument(
+    "-l",
+    "--limit",
+    action="store",
+    dest="limit",
+    help="limit the number of scraped feedback entries",
+    default=None,
+)
+parser.add_argument(
+    "-o",
+    "--output",
+    action="store",
+    dest="output_filename",
+    help="output filename",
+    default=None,
+)
 args = parser.parse_args()
 
 
 def clean_ids(ids):
     cleaned = []
     for id in ids:
-        cleaned.append(id.replace('(#', '').replace(')', ''))
+        cleaned.append(id.replace("(#", "").replace(")", ""))
     return cleaned
 
 
-def fetch_auction_ids(member_id, target_page = 1):
-    page = requests.get("https://www.trademe.co.nz/Members/Feedback.aspx?type=s&member=" + str(member_id) + "&page=" + str(target_page))
+def fetch_auction_ids(member_id, target_page=1):
+    page = requests.get(
+        "https://www.trademe.co.nz/Members/Feedback.aspx?type=s&member="
+        + str(member_id)
+        + "&page="
+        + str(target_page)
+    )
     tree = html.fromstring(page.content)
     member = tree.xpath("//div[@id='membersection']//span/a[@id='MemberLink']/text()")
     raw_ids = tree.xpath("//span[contains(., '(#')]/text()")
@@ -37,14 +63,16 @@ def fetch_auction_ids(member_id, target_page = 1):
 
 
 def fetch_auction(auction_id):
-    url = 'https://www.trademe.co.nz/Archive/Browse/Listing.aspx?id=' + auction_id
+    url = "https://www.trademe.co.nz/Archive/Browse/Listing.aspx?id=" + auction_id
     page = requests.get(url)
     tree = html.fromstring(page.content)
-    title, date = tree.xpath("//div[@id='ListingTitleBox_TitleText']/h1/text() | //span[@id='ClosingTime_ClosingTime']/text()")
+    title, date = tree.xpath(
+        "//div[@id='ListingTitleBox_TitleText']/h1/text() | //span[@id='ClosingTime_ClosingTime']/text()"
+    )
     return [url, title, date.replace(",", "")]
 
 
-def draw_progress_bar(percent, message = "test", barLen = 30):
+def draw_progress_bar(percent, message="test", barLen=30):
     sys.stdout.write("\r")
     progress = ""
     for i in range(barLen):
@@ -72,7 +100,12 @@ def run():
         draw_progress_bar(idx / (id_count - 1), "fetching auction " + id)
         auction_info.append(fetch_auction(id))
 
-    output_target = output_filename if output_filename is not None else member[0] + " - " + str(member_id)
+    output_target = (
+        output_filename
+        if output_filename is not None
+        else member[0] + " - " + str(member_id)
+    )
     write_csv(output_target, auction_info)
+
 
 run()
