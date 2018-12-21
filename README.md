@@ -4,7 +4,7 @@ A simple Python web scraper that retrieves listing details from a given user's f
 
 ## Getting Started
 
-I reccomend using a virtualenv
+I recommend using a virtualenv
 ```
 python3 -m venv venv
 ./venv/scripts/activate
@@ -20,7 +20,7 @@ Run the script with the desired parameters
 python3 scraper.py -m <memberId> -o <outputFile> -l <limit> -p <page>
 ```
 
-If you're unsure parameters are available, check the help message
+If you're unsure what parameters are available, check the help message
 ```
 python3 scraper.py -h
 ```
